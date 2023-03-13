@@ -1,0 +1,23 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+from urllib.parse import urljoin
+
+#下一行变量输入想要爬取的内容
+url = "https://hhic.hhu.edu.cn/13526/list.htm"
+response = requests.get(url, verify=False)
+html_content = response.content
+soup = BeautifulSoup(html_content, "html.parser")
+links = soup.find_all("a")
+unique_links = set()
+data = []
+for link in links:
+    href = link.get("href")
+    text = link.get_text()
+    abs_href = urljoin(url, href)
+    if abs_href not in unique_links:
+        unique_links.add(abs_href)
+        data.append({"名称": text, "链接": abs_href})  
+df = pd.DataFrame(data)
+df.to_csv("e:/output.csv", encoding="utf-8", index=False)
+print(df.to_string(index=False))
